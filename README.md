@@ -1,46 +1,32 @@
+# GitCraft, Visualisation d'un arbre Git dans le jeu Minecraft
 
-Source installation information for modders
--------------------------------------------
-This code follows the Minecraft Forge installation methodology. It will apply
-some small patches to the vanilla MCP source code, giving you and it access 
-to some of the data and functions you need to build a successful mod.
+**Note: Ce projet est incomplet et obsolete, il s'agit d'un Proof-of-Concept réalisé durant mes études à Campus Academy. Pour plus d'informations sur la réalisation de ce projet, veuillez lire [la documentation technique.](TECH_DOC.md)**
 
-Note also that the patches are built against "un-renamed" MCP source code (aka
-SRG Names) - this means that you will not be able to read them directly against
-normal code.
+## Présentation
+GitCraft a pour but d'offrir un aperçu dans le jeu Minecraft d'un repository Git choisi lors de la création du monde
+GitCraft parcours les branches du repo choisi pour générer les branches dans un monde et afficher sous forme de blocks, panneaux, et livre sur des Lectern les informations de chaque commit du repository
 
-Setup Process:
-==============================
+## Représentation prévue des éléments Git
+GitCraft utilisera un code visuel simple pour représenter un repository Git
 
-Step 1: Open your command-line and browse to the folder where you extracted the zip file.
+Chaque commit sera représenté par un cercle avec un Lectern, contenant un livre qui indique l'auteur du commit, la date de celui-ci, le hash, ainsi que le message long
 
-Step 2: You're left with a choice.
-If you prefer to use Eclipse:
-1. Run the following command: `gradlew genEclipseRuns` (`./gradlew genEclipseRuns` if you are on Mac/Linux)
-2. Open Eclipse, Import > Existing Gradle Project > Select Folder 
-   or run `gradlew eclipse` to generate the project.
+![Book](images/presentation/book.png)
 
-If you prefer to use IntelliJ:
-1. Open IDEA, and import project.
-2. Select your build.gradle file and have it import.
-3. Run the following command: `gradlew genIntellijRuns` (`./gradlew genIntellijRuns` if you are on Mac/Linux)
-4. Refresh the Gradle Project in IDEA if required.
+Le lectern possèdera un panneau contenant la description courte du commit en question
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can 
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+![Screenshot of a commit](images/presentation/commit.png)
 
-Mapping Names:
-=============================
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license, if you do not agree with it you can change your mapping names to other crowdsourced names in your 
-build.gradle. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
+Les commits correspondant à une création de branche ou à un merge serons représentés par un cercle au centre coloré
 
-Additional Resources: 
-=========================
-Community Documentation: http://mcforge.readthedocs.io/en/latest/gettingstarted/  
-LexManos' Install Video: https://www.youtube.com/watch?v=8VEdtQLuLO0  
-Forge Forum: https://forums.minecraftforge.net/  
-Forge Discord: https://discord.gg/UvedJ9m  
+![Screenshot of a new branch](images/presentation/branch.png)
+
+Un arbre Git rassemblera tout ces éléments pour représenter un répository complet, si possible avec de multiples branches
+
+![Full repository](images/presentation/tree.png)
+
+## Installation et utilisation
+Pour installer le mod, télécharger et installer MinecraftForge pour Minecraft 1.18.1, sur une installation de Minecraft
+Déplacer ensuite le fichier gitcraft-1.0.jar dans le dossier mods de votre installation (créer ce dossier s’il n’existe pas)
+Lors de la création d’un monde, changer le type de monde pour ‘GitCraft’, et insérez l’URL d’un repo Git à visualiser
+
