@@ -1,0 +1,264 @@
+buildscript {
+    repositories {
+        // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
+        maven { url = 'https://maven.minecraftforge.net' }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+    }
+}
+
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
+apply plugin: 'net.minecraftforge.gradle'
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'eclipse'
+apply plugin: 'maven-publish'
+
+
+version = '1.0'
+group = 'com.wormstweaker.gitcraft' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'gitcraft'
+
+// Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+minecraft {
+    // The mappings can be changed at any time and must be in the following format.
+    // Channel:   Version:
+    // snapshot   YYYYMMDD   Snapshot are built nightly.
+    // stable     #          Stables are built at the discretion of the MCP team.
+    // official   MCVersion  Official field/method names from Mojang mapping files
+    //
+    // You must be aware of the Mojang license when using the 'official' mappings.
+    // See more information here: https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
+    //
+    // Use non-default mappings at your own risk. They may not always work.
+    // Simply re-run your setup task after changing the mappings to update your workspace.
+    mappings channel: 'official', version: '1.18.1'
+
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg') // Currently, this location cannot be changed from the default.
+
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                gitcraft {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            mods {
+                gitcraft {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            // The markers can be added/remove as needed separated by commas.
+            // "SCAN": For mods scan.
+            // "REGISTRIES": For firing of registry events.
+            // "REGISTRYDUMP": For getting the contents of all registries.
+            property 'forge.logging.markers', 'REGISTRIES'
+
+            // Recommended logging level for the console
+            // You can set various levels here.
+            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+            property 'forge.logging.console.level', 'debug'
+
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            args '--mod', 'gitcraft', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            mods {
+                gitcraft {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+// Include resources generated by data generators.
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+configurations {
+    embed
+    compile.extendsFrom embed
+
+    // Create the library configuration, where our non-mod libraries will be added to
+    library
+    // Any dependency in the library configuration will also be added to the implementation configuration
+    implementation.extendsFrom library
+}
+
+// Configure all runs with the following
+minecraft.runs.all {
+    // Set the minecraft_classpath token to the paths of all jars in the library configuration
+    // This is added with the actual Minecraft classpath to get the real classpath information later on
+    lazyToken('minecraft_classpath') {
+        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+    }
+}
+
+repositories {
+    // Put repositories for dependencies here
+    // ForgeGradle automatically adds the Forge maven and Maven Central for you
+    maven { url = 'https://repo.eclipse.org/content/groups/releases/' }
+
+    // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
+    // flatDir {
+    //     dir 'libs'
+    // }
+}
+
+dependencies {
+    // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    minecraft 'net.minecraftforge:forge:1.18.1-39.0.64'
+
+    // Real mod deobf dependency examples - these get remapped to your current mappings
+    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
+    // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
+    // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
+
+    library 'org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r'
+//    runtimeOnly 'org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r'
+//    implementation 'org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r'
+
+//    implementation 'com.googlecode.javaewah:JavaEWAH:1.1.13'
+//    implementation 'org.slf4j:slf4j-api:1.7.30'
+
+    embed 'org.eclipse.jgit:org.eclipse.jgit:6.0.0.202111291000-r'
+
+    // Examples using mod jars from ./libs
+    // implementation fg.deobf("blank:coolmod-${mc_version}:${coolmod_version}")
+
+    // For more info...
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+}
+
+// Custom task to generate the metadata files required for our dependencies
+task generateMetaFiles {
+    // Code for execution after the whole buildscript was parsed and loaded
+    doLast {
+        // Clear the dependencyMeta directory since we don't want old dependencies to still be listed in there
+        file("${buildDir}/dependencyMeta/").deleteDir()
+        configurations.embed.resolvedConfiguration.resolvedArtifacts.each {
+            // Create a meta file for each dependency in a specified directory
+            def metaFile = file("${buildDir}/dependencyMeta/${it.file.name}.meta")
+            metaFile.parentFile.mkdirs()
+            // Use the Gradle notation provided by the API ('group:artifact:version') for the meta file...
+            def artifactRef = it.moduleVersion.toString()
+            // ...and append the classifier if present
+            if (it.classifier != null) {
+                artifactRef += ":${it.classifier}"
+            }
+            // Write the artifact information to the meta file, to be used by the
+            metaFile.text = "Maven-Artifact: $artifactRef"
+        }
+    }
+}
+
+//shadowJar {
+//    archiveFileName = jar.archiveFileName
+//    project.configurations.embed.setTransitive(true)
+//    configurations = [project.configurations.embed]
+//
+//    classifier ''
+//
+//    mergeServiceFiles()
+//}
+//
+//reobf {
+//    shadowJar {}
+//}
+
+// Example for how to get properties into the manifest for reading at runtime.
+jar {
+    into('META-INF/libraries') {
+        // Add all of the dependency JARs to the main JAR for later extraction
+        from configurations.embed
+        // Also include all dependency meta files
+        from "${buildDir}/dependencyMeta/"
+    }
+
+    manifest {
+        attributes([
+                "Specification-Title"     : "GitCraft",
+                "Specification-Vendor"    : "gitcraft",
+                "Specification-Version"   : "1", // We are version 1 of ourselves
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : project.jar.archiveVersion,
+                "Implementation-Vendor"   : "gitcraft",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+//                "ContainedDeps"           : configurations.embed.collect { it.name }.join(' ')
+                "ContainedDeps"           : "org.eclipse.jgit-6.0.0.202111291000-r.jar JavaEWAH-1.1.13.jar slf4j-api-1.7.30.jar"
+        ])
+    }
+
+    // Only run the main jar task after the meta files were built
+    dependsOn generateMetaFiles
+}
+
+// Example configuration to allow publishing using the maven-publish plugin
+// This is the preferred method to reobfuscate your jar file
+shadowJar.finalizedBy('reobfJar')
+// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
+// publish.dependsOn('reobfJar')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+//jar.dependsOn("shadowJar")
